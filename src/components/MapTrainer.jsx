@@ -340,9 +340,9 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
                 className={`px-2.5 py-1 rounded-lg transition-all ${
                   sessionFilter === 'all' ? 'bg-amber-400 text-slate-950 font-bold shadow' : 'text-slate-300'
                 }`}
-                title="Все 19 объектов"
+                title={`Все ${ALL_MAP_ITEMS.length} объектов`}
               >
-                Все (19)
+                Все ({ALL_MAP_ITEMS.length})
               </button>
             </div>
 
@@ -601,7 +601,7 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
                 className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-700/20 hover:opacity-95 transition-all flex items-center justify-center gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                Пройти все 19 объектов снова
+                Пройти все {ALL_MAP_ITEMS.length} объектов снова
               </button>
             </div>
           </div>

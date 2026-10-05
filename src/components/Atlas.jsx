@@ -82,7 +82,7 @@ export default function Atlas() {
                 filter === 'ranges' ? 'bg-amber-400 text-slate-950 font-bold' : 'text-slate-200'
               }`}
             >
-              Горные цепи (14)
+              Горные цепи ({MOUNTAIN_RANGES.length})
             </button>
             <button
               onClick={() => {
@@ -93,7 +93,7 @@ export default function Atlas() {
                 filter === 'summits' ? 'bg-amber-400 text-slate-950 font-bold' : 'text-slate-200'
               }`}
             >
-              Вершины и факты (5)
+              Вершины и факты ({KEY_SUMMITS.length})
             </button>
             <button
               onClick={() => {
@@ -104,7 +104,7 @@ export default function Atlas() {
                 filter === 'terms' ? 'bg-amber-400 text-slate-950 font-bold' : 'text-slate-200'
               }`}
             >
-              Термины (14)
+              Термины ({ALL_TERMS.length})
             </button>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function Atlas() {
           <div className="flex items-center gap-2">
             <MapPin className="w-5 h-5 text-emerald-600" />
             <h3 className="text-lg font-black text-slate-900">
-              Крупнейшие горные массивы мира (14 систем)
+              Крупнейшие горные массивы мира ({MOUNTAIN_RANGES.length} систем)
             </h3>
           </div>
 

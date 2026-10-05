@@ -71,7 +71,7 @@ export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
     {
       id: 'map-pro',
       title: 'Картограф планеты',
-      desc: 'Все 14 горных цепей мира найдены на карте',
+      desc: 'Все горные цепи мира найдены на карте',
       unlocked: ALL_MAP_ITEMS.filter((i) => i.type === 'range').every((i) => (mapSRS[i.id]?.repetitions || 0) > 0),
       icon: MapPin,
     },
@@ -132,7 +132,7 @@ export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
               <MapPin className="w-5 h-5 text-emerald-600" />
               <h3 className="font-extrabold text-slate-900 text-base">Расписание: Карта</h3>
             </div>
-            <span className="text-xs font-bold text-slate-500">19 объектов</span>
+            <span className="text-xs font-bold text-slate-500">{ALL_MAP_ITEMS.length} объектов</span>
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center my-3">
@@ -161,7 +161,7 @@ export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
               <Mountain className="w-5 h-5 text-amber-600" />
               <h3 className="font-extrabold text-slate-900 text-base">Расписание: Термины</h3>
             </div>
-            <span className="text-xs font-bold text-slate-500">14 понятий</span>
+            <span className="text-xs font-bold text-slate-500">{ALL_TERMS.length} понятий</span>
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center my-3">
