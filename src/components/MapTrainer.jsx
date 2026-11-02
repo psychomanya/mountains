@@ -1,18 +1,32 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
 import confetti from 'canvas-confetti';
-import { MOUNTAIN_RANGES, KEY_SUMMITS, ALL_MAP_ITEMS } from '../data/mountainsData';
+import { MOUNTAIN_RANGES, KEY_SUMMITS, PLAINS_AND_PLATEAUS, NEW_HOMEWORK_ITEMS, ALL_MAP_ITEMS } from '../data/mountainsData';
 import { calculateSM2, getIntervalPreview, getMasteryLevel, isItemDue } from '../utils/srs';
 import { playSuccess, playError, playClick, playFanfare } from '../utils/audio';
 import { CheckCircle2, XCircle, Eye, RefreshCw, Trophy, Sparkles, Navigation, Layers, Info, ArrowRight, X } from 'lucide-react';
 
 // Custom SVG mountain marker icon for summits
-const createMountainIcon = (isTarget = false, isDiscovered = false) => {
-  const fillColor = isTarget ? '#e11d48' : isDiscovered ? '#10b981' : '#ea580c';
-  const size = isTarget ? 38 : 30;
+const createMountainIcon = ({ isCorrect = false, isRevealed = false } = {}) => {
+  let fillColor = '#ea580c';
+  let size = 30;
+  let pulseHtml = '';
+
+  if (isCorrect) {
+    fillColor = '#10b981';
+    size = 38;
+  } else if (isRevealed) {
+    fillColor = '#f59e0b';
+    size = 40;
+    pulseHtml = `
+      <span style="position: absolute; top: -15px; left: -15px; width: 54px; height: 54px; border-radius: 9999px; background: rgba(245, 158, 11, 0.5); animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite; pointer-events: none;"></span>
+    `;
+  }
+
   const svgHtml = `
-    <div style="transform: translate(-50%, -100%);">
-      <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fillColor}" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); cursor: pointer;">
+    <div style="position: relative; transform: translate(-50%, -100%);">
+      ${pulseHtml}
+      <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fillColor}" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45)); cursor: pointer; transition: all 0.3s ease;">
         <polygon points="12 2 2 22 22 22" />
         <polygon points="12 8 8 16 16 16" fill="#ffffff" opacity="0.85" />
       </svg>
@@ -50,7 +64,9 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
   // Initialize or reset session queue
   const startSession = (filter = sessionFilter) => {
     let queue = [];
-    if (filter === 'due') {
+    if (filter === 'new_homework') {
+      queue = [...NEW_HOMEWORK_ITEMS];
+    } else if (filter === 'due') {
       queue = dueItems.length > 0 ? [...dueItems] : [...ALL_MAP_ITEMS];
     } else {
       queue = [...ALL_MAP_ITEMS];
@@ -193,6 +209,67 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
       layersRef.current.polygons[range.id] = polygon;
     });
 
+    // Add Plains and Plateaus: same uniform mountain orange style as mountain ranges
+    PLAINS_AND_PLATEAUS.forEach((plain) => {
+      const isTarget = currentTarget && currentTarget.id === plain.id;
+      const isRevealed = currentResult === 'revealed' && isTarget;
+      const isCorrect = currentResult === 'correct' && isTarget;
+
+      // Same style as MOUNTAIN_RANGES: vibrant mountain orange
+      let color = '#ea580c';
+      let fillColor = '#f97316';
+      let fillOpacity = 0.72;
+      let weight = 2.5;
+
+      if (isCorrect) {
+        color = '#047857';
+        fillColor = '#10b981';
+        fillOpacity = 0.92;
+        weight = 3.5;
+      } else if (isRevealed) {
+        color = '#b45309';
+        fillColor = '#f59e0b';
+        fillOpacity = 0.95;
+        weight = 3.5;
+      }
+
+      const polygon = L.polygon(plain.polygon, {
+        color,
+        fillColor,
+        fillOpacity,
+        weight,
+        smoothFactor: 1,
+      }).addTo(map);
+
+      polygon.on('click', () => {
+        handleItemClick(plain);
+      });
+
+      polygon.on('mouseover', () => {
+        if (!isCorrect && !isRevealed) {
+          polygon.setStyle({
+            fillColor: '#fb923c',
+            color: '#c2410c',
+            fillOpacity: 0.88,
+            weight: 3.5,
+          });
+        }
+      });
+
+      polygon.on('mouseout', () => {
+        if (!isCorrect && !isRevealed) {
+          polygon.setStyle({
+            fillColor,
+            color,
+            fillOpacity,
+            weight,
+          });
+        }
+      });
+
+      layersRef.current.polygons[plain.id] = polygon;
+    });
+
     // Add Key Summits
     KEY_SUMMITS.forEach((summit) => {
       const isTarget = currentTarget && currentTarget.id === summit.id;
@@ -200,7 +277,7 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
       const isCorrect = currentResult === 'correct' && isTarget;
 
       const marker = L.marker(summit.coordinates, {
-        icon: createMountainIcon(isTarget, isCorrect || isRevealed),
+        icon: createMountainIcon({ isCorrect, isRevealed }),
       }).addTo(map);
 
       marker.on('click', () => {
@@ -240,10 +317,10 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
     setCurrentResult('revealed');
 
     // Pan smoothly to target
-    if (currentTarget.type === 'range') {
+    if (currentTarget.type === 'range' || currentTarget.type === 'plain') {
       mapInstanceRef.current.flyToBounds(currentTarget.bounds, { duration: 1.5, maxZoom: 6 });
     } else {
-      mapInstanceRef.current.flyTo(currentTarget.coordinates, 6, { duration: 1.5 });
+      mapInstanceRef.current.flyTo(currentTarget.coordinates, 5, { duration: 1.5 });
     }
   };
 
@@ -327,6 +404,17 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
             {/* Filter buttons */}
             <div className="flex rounded-xl bg-slate-800 p-0.5 text-xs font-semibold border border-slate-700">
               <button
+                onClick={() => setSessionFilter('new_homework')}
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 ${
+                  sessionFilter === 'new_homework'
+                    ? 'bg-amber-400 text-slate-950 font-black shadow'
+                    : 'text-amber-300 hover:text-white'
+                }`}
+                title="9 новых объектов по заданию учителя (к пересдаче и ДЗ)"
+              >
+                <span>⭐ Новое ДЗ ({NEW_HOMEWORK_ITEMS.length})</span>
+              </button>
+              <button
                 onClick={() => setSessionFilter('due')}
                 className={`px-2.5 py-1 rounded-lg transition-all ${
                   sessionFilter === 'due' ? 'bg-amber-400 text-slate-950 font-bold shadow' : 'text-slate-300'
@@ -391,8 +479,18 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-1.5 leading-none">
                   <span className="text-[10px] font-black uppercase tracking-wider text-slate-900 bg-amber-300/90 px-1.5 py-0.5 rounded">
-                    {currentTarget.type === 'range' ? 'Горная система' : 'Вершина мира'}
+                    {currentTarget.type === 'range' ? 'Горная система' : currentTarget.type === 'plain' ? 'Равнина / Нагорье' : 'Вершина мира'}
                   </span>
+                  {currentTarget.continent && (
+                    <span className="text-[10px] font-black text-slate-900 bg-amber-200/90 border border-amber-300 px-1.5 py-0.5 rounded">
+                      🌍 {currentTarget.continent.split('(')[0].trim()}
+                    </span>
+                  )}
+                  {currentTarget.isNewHomework && (
+                    <span className="text-[10px] font-black text-amber-950 bg-amber-200 border border-amber-400 px-1.5 py-0.5 rounded">
+                      ⭐ Задание учителя
+                    </span>
+                  )}
                   {currentTarget.factInParentheses && (
                     <span className="text-[10px] font-black text-slate-900 bg-black/10 px-1.5 py-0.5 rounded truncate">
                       ★ {currentTarget.factInParentheses}
@@ -593,16 +691,26 @@ export default function MapTrainer({ srsStorage, onSaveSRS }) {
                 Экспедиция завершена!
               </h2>
               <p className="text-sm text-slate-600 mb-5">
-                Вы успешно повторили все горные цепи и вершины! Ваши интервалы обновлены и сохранены в браузере.
+                Вы успешно повторили географические объекты! Ваши интервалы обновлены и сохранены в браузере.
               </p>
 
-              <button
-                onClick={() => startSession('all')}
-                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-700/20 hover:opacity-95 transition-all flex items-center justify-center gap-2"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Пройти все {ALL_MAP_ITEMS.length} объектов снова
-              </button>
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={() => startSession('new_homework')}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="w-4 h-4 text-slate-950" />
+                  Повторить только Новое ДЗ ({NEW_HOMEWORK_ITEMS.length} объектов)
+                </button>
+
+                <button
+                  onClick={() => startSession('all')}
+                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-extrabold text-sm shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Пройти все {ALL_MAP_ITEMS.length} объектов снова
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { MOUNTAIN_RANGES, KEY_SUMMITS } from '../data/mountainsData';
 import { ALL_TERMS, COMPARISON_TOPICS } from '../data/termsData';
 import { playClick } from '../utils/audio';
-import { Search, MapPin, Mountain, BookOpen, ExternalLink, Flame, HelpCircle } from 'lucide-react';
+import { Search, MapPin, Mountain, BookOpen, ExternalLink, Flame, HelpCircle, Layers } from 'lucide-react';
+import { ALL_LITHOSPHERE_CARDS, LITHOSPHERE_FACTS } from '../data/lithosphereData';
 
 export default function Atlas() {
   const [search, setSearch] = useState('');
@@ -30,6 +31,14 @@ export default function Atlas() {
       (item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.shortDef.toLowerCase().includes(search.toLowerCase()) ||
         item.fullDef.toLowerCase().includes(search.toLowerCase()))
+  );
+
+    const filteredLitho = ALL_LITHOSPHERE_CARDS.filter(
+    (item) =>
+      (filter === 'all' || filter === 'litho') &&
+      (item.title.toLowerCase().includes(search.toLowerCase()) ||
+        item.description.toLowerCase().includes(search.toLowerCase()) ||
+        item.category.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -105,6 +114,17 @@ export default function Atlas() {
               }`}
             >
               Термины ({ALL_TERMS.length})
+            </button>
+            <button
+              onClick={() => {
+                playClick();
+                setFilter('litho');
+              }}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                filter === 'litho' ? 'bg-amber-400 text-slate-950 font-bold' : 'text-slate-200'
+              }`}
+            >
+              Литосфера ({ALL_LITHOSPHERE_CARDS.length})
             </button>
           </div>
         </div>
@@ -270,6 +290,79 @@ export default function Atlas() {
           </div>
         </section>
       )}
+    
+      {/* SECTION: LITHOSPHERE (СТРОГО ПО КОНСПЕКТУ) */}
+      {(filter === 'all' || filter === 'litho') && filteredLitho.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Layers className="w-5 h-5 text-amber-500" />
+            <h3 className="text-lg font-black text-slate-900">
+              Литосфера, строение Земли и тектонические плиты ({ALL_LITHOSPHERE_CARDS.length} фактов)
+            </h3>
+          </div>
+
+          {/* Key Facts Summary Banner */}
+          <div className="bg-gradient-to-r from-amber-900 to-stone-900 text-white rounded-3xl p-5 border border-amber-600/30 shadow-md">
+            <h4 className="text-sm font-black uppercase tracking-wider text-amber-300 mb-2">
+              Базовые факты по конспекту урока
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              <div className="bg-white/10 rounded-2xl p-3 border border-white/10">
+                <span className="font-bold text-amber-300 block mb-1">Что такое Литосфера:</span>
+                {LITHOSPHERE_FACTS.definition}
+              </div>
+              <div className="bg-white/10 rounded-2xl p-3 border border-white/10">
+                <span className="font-bold text-amber-300 block mb-1">Толщина литосферы:</span>
+                {LITHOSPHERE_FACTS.thickness}
+              </div>
+              <div className="bg-white/10 rounded-2xl p-3 border border-white/10">
+                <span className="font-bold text-amber-300 block mb-1">Скорость движения плит:</span>
+                {LITHOSPHERE_FACTS.plateSpeed}
+              </div>
+              <div className="bg-white/10 rounded-2xl p-3 border border-white/10">
+                <span className="font-bold text-amber-300 block mb-1">Типы границ плит:</span>
+                Столкновение (зубчатая линия): горы, землетрясения.<br />
+                Раздвижение (прямая линия): разломы, вулканы.
+              </div>
+            </div>
+          </div>
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {filteredLitho.map((card) => (
+              <div
+                key={card.id}
+                className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-amber-400 transition-colors"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <h4 className="text-base font-extrabold text-slate-900">{card.title}</h4>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                      {card.category}
+                    </span>
+                  </div>
+                  <p className="text-xs font-semibold text-slate-700 mb-2">{card.description}</p>
+                  {card.details && (
+                    <p className="text-xs text-slate-600 mb-2 leading-relaxed">{card.details}</p>
+                  )}
+                  {card.fact && (
+                    <div className="bg-amber-50 rounded-xl p-2.5 border border-amber-100 text-xs text-amber-900 mb-2 font-medium">
+                      ★ {card.fact}
+                    </div>
+                  )}
+                </div>
+
+                {card.rule && (
+                  <div className="text-[11px] text-slate-600 pt-2 border-t border-slate-100 font-medium">
+                    📌 {card.rule}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
     </div>
   );
 }

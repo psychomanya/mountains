@@ -1,25 +1,35 @@
 import React from 'react';
-import { ALL_MAP_ITEMS } from '../data/mountainsData';
+import { ALL_MAP_ITEMS, NEW_HOMEWORK_ITEMS, PLAINS_AND_PLATEAUS } from '../data/mountainsData';
 import { ALL_TERMS } from '../data/termsData';
+import { ALL_LITHOSPHERE_CARDS } from '../data/lithosphereData';
 import { getMasteryLevel, isItemDue } from '../utils/srs';
 import { playClick } from '../utils/audio';
-import { Trophy, Award, Calendar, CheckCircle2, RotateCcw, Compass, MapPin, Mountain, Flame, Star } from 'lucide-react';
+import { Trophy, Award, Calendar, CheckCircle2, RotateCcw, Compass, MapPin, Mountain, Flame, Star, Sparkles, Layers } from 'lucide-react';
 
-export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
+export default function ExpeditionStats({ mapSRS, termsSRS, lithoSRS = {}, onResetAll }) {
   // Compute Map Stats
   const mapLearned = ALL_MAP_ITEMS.filter((item) => (mapSRS[item.id]?.repetitions || 0) > 0);
   const mapMastered = ALL_MAP_ITEMS.filter((item) => (mapSRS[item.id]?.repetitions || 0) >= 3);
   const mapDue = ALL_MAP_ITEMS.filter((item) => isItemDue(mapSRS[item.id]));
+
+  // Compute Homework Stats
+  const homeworkLearned = NEW_HOMEWORK_ITEMS.filter((item) => (mapSRS[item.id]?.repetitions || 0) > 0);
+  const homeworkMastered = NEW_HOMEWORK_ITEMS.filter((item) => (mapSRS[item.id]?.repetitions || 0) >= 3);
 
   // Compute Terms Stats
   const termsLearned = ALL_TERMS.filter((item) => (termsSRS[item.id]?.repetitions || 0) > 0);
   const termsMastered = ALL_TERMS.filter((item) => (termsSRS[item.id]?.repetitions || 0) >= 3);
   const termsDue = ALL_TERMS.filter((item) => isItemDue(termsSRS[item.id]));
 
+  // Compute Lithosphere Stats
+  const lithoLearned = ALL_LITHOSPHERE_CARDS.filter((item) => (lithoSRS[item.id]?.repetitions || 0) > 0);
+  const lithoMastered = ALL_LITHOSPHERE_CARDS.filter((item) => (lithoSRS[item.id]?.repetitions || 0) >= 3);
+  const lithoDue = ALL_LITHOSPHERE_CARDS.filter((item) => isItemDue(lithoSRS[item.id]));
+
   // Overall Score
-  const totalItems = ALL_MAP_ITEMS.length + ALL_TERMS.length;
-  const totalLearned = mapLearned.length + termsLearned.length;
-  const totalMastered = mapMastered.length + termsMastered.length;
+  const totalItems = ALL_MAP_ITEMS.length + ALL_TERMS.length + ALL_LITHOSPHERE_CARDS.length;
+  const totalLearned = mapLearned.length + termsLearned.length + lithoLearned.length;
+  const totalMastered = mapMastered.length + termsMastered.length + lithoMastered.length;
   const percentComplete = Math.round((totalLearned / totalItems) * 100);
 
   // Determine Title / Rank
@@ -27,15 +37,15 @@ export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
   let rankStars = 1;
   let rankColor = 'from-slate-700 to-slate-900';
 
-  if (totalMastered >= 25) {
+  if (totalMastered >= 40) {
     rankTitle = 'Мастер горных вершин';
     rankStars = 5;
     rankColor = 'from-purple-800 to-indigo-950';
-  } else if (totalLearned >= 20) {
+  } else if (totalLearned >= 50) {
     rankTitle = 'Покоритель континентов';
     rankStars = 4;
     rankColor = 'from-amber-600 to-amber-900';
-  } else if (totalLearned >= 10) {
+  } else if (totalLearned >= 15) {
     rankTitle = 'Опытный топограф';
     rankStars = 3;
     rankColor = 'from-teal-700 to-emerald-950';
@@ -50,16 +60,37 @@ export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
     {
       id: 'first-step',
       title: 'Первый привал',
-      desc: 'Выучен хотя бы один горный объект',
+      desc: 'Выучен хотя бы один географический объект',
       unlocked: totalLearned >= 1,
       icon: Compass,
     },
     {
+      id: 'homework-master',
+      title: 'Отличник контрольной (Новое ДЗ)',
+      desc: 'Все 9 объектов по заданию учителя выучены и найдены на карте',
+      unlocked: NEW_HOMEWORK_ITEMS.every((i) => (mapSRS[i.id]?.repetitions || 0) > 0),
+      icon: Star,
+    },
+    {
       id: 'summits-master',
-      title: 'Покоритель 5 вершин',
-      desc: 'Все 5 ключевых вершин планеты выучены с фактами',
+      title: 'Покоритель вершин мира',
+      desc: 'Все ключевые вершины планеты (включая Арарат, Костюшко, К2, Столовую) освоены с фактами',
       unlocked: ALL_MAP_ITEMS.filter((i) => i.type === 'summit').every((i) => (mapSRS[i.id]?.repetitions || 0) > 0),
       icon: Mountain,
+    },
+    {
+      id: 'plains-master',
+      title: 'Знаток равнин и нагорий',
+      desc: 'Тибетское и Араратское нагорья, Восточно-Сибирская и Великие равнины освоены',
+      unlocked: PLAINS_AND_PLATEAUS.every((i) => (mapSRS[i.id]?.repetitions || 0) > 0),
+      icon: Compass,
+    },
+    {
+      id: 'litho-pro',
+      title: 'Знаток литосферы и тектоники',
+      desc: 'Строение Земли, 12 плит, очаг, эпицентр и вулканы по конспекту освоены',
+      unlocked: lithoLearned.length >= 10,
+      icon: Layers,
     },
     {
       id: 'geologist',
@@ -123,8 +154,32 @@ export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
         </div>
       </div>
 
+      {/* Teacher Homework Focus Box */}
+      <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 rounded-3xl p-5 sm:p-6 text-slate-950 shadow-lg border-2 border-amber-300 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center font-black shadow-md flex-shrink-0">
+            <Sparkles className="w-6 h-6 animate-pulse" />
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-black tracking-wider bg-slate-950 text-amber-300 px-2 py-0.5 rounded-md">
+              Срочный фокус к контрольной
+            </span>
+            <h3 className="text-base sm:text-lg font-black text-slate-950 mt-1">
+              Новое ДЗ по заданию учителя: {homeworkLearned.length} из {NEW_HOMEWORK_ITEMS.length} выучено
+            </h3>
+            <p className="text-xs text-slate-900 font-medium">
+              Арарат, Костюшко, К2, Столовая гора (Африка и Кавказ), Б. Водораздельный хребет + нагорья (Тибет, Арарат) и великие равнины (Вост.-Европейская, Вост.-Сибирская, Западно-Сибирская, Великие равнины).
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-slate-950 text-white px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 shadow-inner">
+          <span>{homeworkLearned.length === NEW_HOMEWORK_ITEMS.length ? '🏆 Все объекты ДЗ выучены!' : `${Math.round((homeworkLearned.length / NEW_HOMEWORK_ITEMS.length) * 100)}% готовность`}</span>
+        </div>
+      </div>
+
       {/* Independent Schedule Status Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Map Schedule */}
         <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-3">
@@ -180,6 +235,35 @@ export default function ExpeditionStats({ mapSRS, termsSRS, onResetAll }) {
           </div>
           <p className="text-xs text-slate-500">
             Охватывает рельеф, типы склонов, жерло, кратер и отличие лавы от мантии.
+          </p>
+        </div>
+
+        {/* Lithosphere Schedule */}
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Layers className="w-5 h-5 text-amber-600" />
+              <h3 className="font-extrabold text-slate-900 text-base">Расписание: Литосфера</h3>
+            </div>
+            <span className="text-xs font-bold text-slate-500">{ALL_LITHOSPHERE_CARDS.length} фактов</span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-center my-3">
+            <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">
+              <div className="text-lg font-black text-emerald-800">{lithoLearned.length}</div>
+              <div className="text-[10px] text-emerald-700 font-semibold uppercase">В процессе</div>
+            </div>
+            <div className="bg-purple-50 p-2.5 rounded-xl border border-purple-100">
+              <div className="text-lg font-black text-purple-800">{lithoMastered.length}</div>
+              <div className="text-[10px] text-purple-700 font-semibold uppercase">Освоено (Мастер)</div>
+            </div>
+            <div className="bg-amber-50 p-2.5 rounded-xl border border-amber-100">
+              <div className="text-lg font-black text-amber-800">{lithoDue.length}</div>
+              <div className="text-[10px] text-amber-700 font-semibold uppercase">К повтору сегодня</div>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500">
+            Слои Земли, 12 плит, границы, очаг, эпицентр, Рихтер и вулканы.
           </p>
         </div>
       </div>

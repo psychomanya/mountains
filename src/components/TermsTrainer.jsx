@@ -367,40 +367,54 @@ export default function TermsTrainer({ srsStorage, onSaveSRS }) {
             </div>
           </div>
 
-          {/* Geological comparisons: Лава vs Мантия & 3 вида склонов */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3 border-t border-slate-100">
+          {/* Geological comparisons: Лава vs Мантия, 3 вида склонов & Кордильеры vs Анды */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-3 border-t border-slate-100">
             {COMPARISON_TOPICS.map((topic) => (
-              <div key={topic.id} className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200 shadow-sm">
-                <h4 className="text-sm font-black text-slate-900 mb-1.5 flex items-center gap-1.5">
-                  <HelpCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                  {topic.title}
-                </h4>
-                <p className="text-xs text-slate-600 mb-2.5 leading-relaxed">{topic.summary}</p>
+              <div key={topic.id} className="bg-slate-50/80 rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 mb-1.5 flex items-center gap-1.5">
+                    <HelpCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    {topic.title}
+                  </h4>
+                  <p className="text-xs text-slate-600 mb-2.5 leading-relaxed">{topic.summary}</p>
 
-                <div className="space-y-1.5 mb-2.5">
-                  {topic.differences.map((diff, i) => (
-                    <div key={i} className="text-xs bg-white p-2 rounded-xl border border-slate-200">
-                      <span className="font-bold text-slate-800 block">{diff.aspect}</span>
-                      {diff.mantle && (
-                        <div className="text-slate-700 mt-0.5">
-                          <span className="text-amber-800 font-bold">• Мантия: </span>
-                          {diff.mantle}
-                        </div>
-                      )}
-                      {diff.lava && (
-                        <div className="text-slate-700 mt-0.5">
-                          <span className="text-red-700 font-bold">• Лава: </span>
-                          {diff.lava}
-                        </div>
-                      )}
-                      {diff.angle && (
-                        <div className="text-slate-700 mt-0.5">
-                          <span className="font-bold text-emerald-800">{diff.angle}: </span>
-                          {diff.description}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  <div className="space-y-1.5 mb-2.5">
+                    {topic.differences.map((diff, i) => (
+                      <div key={i} className="text-xs bg-white p-2 rounded-xl border border-slate-200">
+                        <span className="font-bold text-slate-800 block">{diff.aspect}</span>
+                        {diff.mantle && (
+                          <div className="text-slate-700 mt-0.5">
+                            <span className="text-amber-800 font-bold">• Мантия: </span>
+                            {diff.mantle}
+                          </div>
+                        )}
+                        {diff.lava && (
+                          <div className="text-slate-700 mt-0.5">
+                            <span className="text-red-700 font-bold">• Лава: </span>
+                            {diff.lava}
+                          </div>
+                        )}
+                        {diff.cordillera && (
+                          <div className="text-slate-700 mt-0.5">
+                            <span className="text-blue-800 font-bold">• Кордильеры: </span>
+                            {diff.cordillera}
+                          </div>
+                        )}
+                        {diff.andes && (
+                          <div className="text-slate-700 mt-0.5">
+                            <span className="text-teal-800 font-bold">• Анды: </span>
+                            {diff.andes}
+                          </div>
+                        )}
+                        {diff.angle && (
+                          <div className="text-slate-700 mt-0.5">
+                            <span className="font-bold text-emerald-800">{diff.angle}: </span>
+                            {diff.description}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="bg-amber-100/70 border border-amber-300 text-amber-950 p-2 rounded-xl text-[11px] font-bold leading-relaxed">
@@ -568,40 +582,54 @@ export default function TermsTrainer({ srsStorage, onSaveSRS }) {
             </div>
           )}
 
-          {/* Interactive Special Topic: Лава vs Мантия & Виды склонов */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          {/* Interactive Special Topic: Лава vs Мантия, Виды склонов & Кордильеры vs Анды */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
             {COMPARISON_TOPICS.map((topic) => (
-              <div key={topic.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <h4 className="text-base font-black text-slate-900 mb-2 flex items-center gap-2">
-                  <HelpCircle className="w-4 h-4 text-amber-600" />
-                  {topic.title}
-                </h4>
-                <p className="text-xs text-slate-600 mb-3 leading-relaxed">{topic.summary}</p>
+              <div key={topic.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <h4 className="text-base font-black text-slate-900 mb-2 flex items-center gap-2">
+                    <HelpCircle className="w-4 h-4 text-amber-600" />
+                    {topic.title}
+                  </h4>
+                  <p className="text-xs text-slate-600 mb-3 leading-relaxed">{topic.summary}</p>
 
-                <div className="space-y-2 mb-3">
-                  {topic.differences.map((diff, i) => (
-                    <div key={i} className="text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                      <span className="font-black text-slate-800 block mb-1">{diff.aspect}</span>
-                      {diff.mantle && (
-                        <div className="text-slate-700">
-                          <span className="text-amber-800 font-bold">• Мантия: </span>
-                          {diff.mantle}
-                        </div>
-                      )}
-                      {diff.lava && (
-                        <div className="text-slate-700 mt-1">
-                          <span className="text-red-700 font-bold">• Лава: </span>
-                          {diff.lava}
-                        </div>
-                      )}
-                      {diff.angle && (
-                        <div className="text-slate-700">
-                          <span className="font-bold text-emerald-800">{diff.angle}: </span>
-                          {diff.description}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  <div className="space-y-2 mb-3">
+                    {topic.differences.map((diff, i) => (
+                      <div key={i} className="text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                        <span className="font-black text-slate-800 block mb-1">{diff.aspect}</span>
+                        {diff.mantle && (
+                          <div className="text-slate-700">
+                            <span className="text-amber-800 font-bold">• Мантия: </span>
+                            {diff.mantle}
+                          </div>
+                        )}
+                        {diff.lava && (
+                          <div className="text-slate-700 mt-1">
+                            <span className="text-red-700 font-bold">• Лава: </span>
+                            {diff.lava}
+                          </div>
+                        )}
+                        {diff.cordillera && (
+                          <div className="text-slate-700 mt-1">
+                            <span className="text-blue-800 font-bold">• Кордильеры: </span>
+                            {diff.cordillera}
+                          </div>
+                        )}
+                        {diff.andes && (
+                          <div className="text-slate-700 mt-1">
+                            <span className="text-teal-800 font-bold">• Анды: </span>
+                            {diff.andes}
+                          </div>
+                        )}
+                        {diff.angle && (
+                          <div className="text-slate-700">
+                            <span className="font-bold text-emerald-800">{diff.angle}: </span>
+                            {diff.description}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="bg-amber-50 border border-amber-200 text-amber-900 p-2.5 rounded-xl text-xs font-bold leading-relaxed">

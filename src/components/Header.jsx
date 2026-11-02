@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Volume2, VolumeX, MapPin, Compass, BookOpen, Award, Mountain } from 'lucide-react';
+import { Volume2, VolumeX, MapPin, Compass, BookOpen, Award, Mountain, Layers } from 'lucide-react';
 import { toggleSound, getSoundEnabled, playClick } from '../utils/audio';
 
-export default function Header({ activeTab, setActiveTab, mapDueCount, termsDueCount, overallRank }) {
+export default function Header({ activeTab, setActiveTab, mapDueCount, termsDueCount, lithoDueCount, overallRank }) {
   const [soundOn, setSoundOn] = useState(getSoundEnabled());
 
   const handleSoundToggle = () => {
@@ -28,6 +28,14 @@ export default function Header({ activeTab, setActiveTab, mapDueCount, termsDueC
       dueBadge: termsDueCount,
       color: 'amber',
     },
+    {
+      id: 'litho',
+      label: 'Литосфера',
+      icon: Layers,
+      dueBadge: lithoDueCount,
+      color: 'amber',
+    },
+
     {
       id: 'atlas',
       label: 'Справочник-Атлас',
